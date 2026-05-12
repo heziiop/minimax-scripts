@@ -16,13 +16,14 @@ export GLOO_SOCKET_IFNAME=lo
 export HCCL_OP_EXPANSION_MODE=AIV
 export TASK_QUEUE_ENABLE=1
 
-export HCCL_BUFFSIZE=800
+export HCCL_BUFFSIZE=1500
+export ASCEND_USE_FIA=1
 export SGLANG_SET_CPU_AFFINITY=1
 export SGLANG_ENABLE_SPEC_V2=1
+export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
+export SGLANG_NPU_USE_MULTI_STREAM=1
 export SGLANG_NPU_FUSED_MOE_MODE=2
-export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=204800
-export SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE=1
-export SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES=200
+export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=224000
 
 MODEL_PATH=/home/weights/MiniMax-M2.5-w8a8-QuaRot
 EAGLE_MODEL_PATH=/home/weights/MiniMax-M2.5-eagel-model-0318
@@ -32,18 +33,15 @@ export SGLANG_EXTERNAL_MODEL_PACKAGE=custom_eagle3
 sglang serve \
    --model-path $MODEL_PATH \
    --host 127.0.0.1 \
-   --port 32000 \
+   --port 32001 \
    --tp-size 16 \
-   --enable-dp-attention \
    --dp-size 16 \
-   --ep-size 16 \
+   --enable-dp-attention \
    --mem-fraction-static 0.75 \
-   --max-running-requests 512 \
+   --max-running-requests 128 \
    --disable-radix-cache \
-   --prefill-delayer-max-delay-passes \
-   --enable-prefill-delayer \
-   --chunked-prefill-size -1 --max-prefill-token 4096 \
-   --cuda-graph-bs 1 7 8 9 10 16 \
+   --chunked-prefill-size -1 --max-prefill-token 8192 \
+   --cuda-graph-bs 2 4 6 8 \
    --moe-a2a-backend ascend_fuseep --deepep-mode auto --quantization modelslim \
    --speculative-algorithm EAGLE3 \
    --speculative-draft-model-path $EAGLE_MODEL_PATH \
@@ -51,4 +49,7 @@ sglang serve \
    --speculative-eagle-topk 1 \
    --speculative-num-draft-tokens 4 \
    --speculative-draft-model-quantization unquant \
-   --dtype bfloat16
+   --dtype bfloat16 \
+   --tokenizer-worker-num 2 \
+   --prefill-delayer-max-delay-passes 500 \
+   --enable-prefill-delayer
