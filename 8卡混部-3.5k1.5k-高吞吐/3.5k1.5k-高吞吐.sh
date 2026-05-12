@@ -17,8 +17,10 @@ export HCCL_OP_EXPANSION_MODE=AIV
 export TASK_QUEUE_ENABLE=1
 
 export HCCL_BUFFSIZE=800
+export ASCEND_USE_FIA=1
 export SGLANG_SET_CPU_AFFINITY=1
 export SGLANG_ENABLE_SPEC_V2=1
+export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
 export SGLANG_NPU_FUSED_MOE_MODE=2
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=204800
 
@@ -30,18 +32,17 @@ export SGLANG_EXTERNAL_MODEL_PACKAGE=custom_eagle3
 sglang serve \
    --model-path $MODEL_PATH \
    --host 127.0.0.1 \
-   --port 32000 \
+   --port 32001 \
    --tp-size 16 \
    --enable-dp-attention \
    --dp-size 16 \
-   --ep-size 16 \
    --mem-fraction-static 0.75 \
-   --max-running-requests 2048 \
+   --max-running-requests 480 \
    --disable-radix-cache \
-   --prefill-delayer-max-delay-passes 200 \
+   --prefill-delayer-max-delay-passes 500 \
    --enable-prefill-delayer \
-   --chunked-prefill-size -1 --max-prefill-token 4096 \
-   --cuda-graph-bs 1 2 24 32 48 64 65 80 81 \
+   --chunked-prefill-size -1 --max-prefill-token 8192 \
+   --cuda-graph-bs 4 24 32 48 64 80  \
    --moe-a2a-backend ascend_fuseep --deepep-mode auto --quantization modelslim \
    --speculative-algorithm EAGLE3 \
    --speculative-draft-model-path $EAGLE_MODEL_PATH \
