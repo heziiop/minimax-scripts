@@ -12,7 +12,7 @@ set -euo pipefail
 
 PORT=6677
 
-export PYTHONPATH=/home/hzy/code/sglang/python:$PYTHONPATH
+export PYTHONPATH=/home/xxx/code/sglang/python:$PYTHONPATH
 
 python3 -m sglang.bench_serving \
     --host 127.0.0.1 \
