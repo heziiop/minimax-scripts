@@ -1,47 +1,55 @@
+echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+sysctl -w vm.swappiness=0
+sysctl -w kernel.numa_balancing=0
+sysctl -w kernel.sched_migration_cost_ns=50000
+
 unset https_proxy
 unset http_proxy
 unset HTTPS_PROXY
 unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
+export PYTHONPATH=/home/xxx/code/sglang/python:$PYTHONPATH
+
 source /usr/local/Ascend/ascend-toolkit/set_env.sh
 source /usr/local/Ascend/nnal/atb/set_env.sh
-# 内存碎片
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 export STREAMS_PER_DEVICE=32
-# 网卡
 export HCCL_SOCKET_IFNAME=lo
 export GLOO_SOCKET_IFNAME=lo
 
-export HCCL_OP_EXPANSION_MODE=AIV
 export TASK_QUEUE_ENABLE=1
 
-export HCCL_BUFFSIZE=1500
+export HCCL_BUFFSIZE=2048
 export ASCEND_USE_FIA=1
 export SGLANG_SET_CPU_AFFINITY=1
 export SGLANG_ENABLE_SPEC_V2=1
 export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
-export SGLANG_NPU_USE_MULTI_STREAM=1
 export SGLANG_NPU_FUSED_MOE_MODE=2
-export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=224000
+export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=204800
 
 MODEL_PATH=/home/weights/MiniMax-M2.5-w8a8-QuaRot
 EAGLE_MODEL_PATH=/home/weights/MiniMax-M2.5-eagel-model-0318
 export PYTHONPATH=${EAGLE_MODEL_PATH}:$PYTHONPATH
 export SGLANG_EXTERNAL_MODEL_PACKAGE=custom_eagle3
 
-sglang serve \
+python -m sglang.launch_server \
    --model-path $MODEL_PATH \
    --host 127.0.0.1 \
-   --port 32001 \
+   --port 6677 \
    --tp-size 16 \
-   --dp-size 16 \
    --enable-dp-attention \
-   --mem-fraction-static 0.75 \
-   --max-running-requests 128 \
+   --dp-size 16 \
+   --mem-fraction-static 0.53 \
+   --max-running-requests 96 \
    --disable-radix-cache \
+   --reasoning-parser minimax-append-think \
+   --tool-call-parser minimax-m2 \
+   --prefill-delayer-max-delay-passes 500 \
+   --enable-prefill-delayer \
+   --prefill-max-requests 3 \
    --chunked-prefill-size -1 --max-prefill-token 8192 \
-   --cuda-graph-bs 2 4 6 8 \
+   --cuda-graph-bs 1 2 3 4 5 6 \
    --moe-a2a-backend ascend_fuseep --deepep-mode auto --quantization modelslim \
    --speculative-algorithm EAGLE3 \
    --speculative-draft-model-path $EAGLE_MODEL_PATH \
@@ -49,7 +57,4 @@ sglang serve \
    --speculative-eagle-topk 1 \
    --speculative-num-draft-tokens 4 \
    --speculative-draft-model-quantization unquant \
-   --dtype bfloat16 \
-   --tokenizer-worker-num 2 \
-   --prefill-delayer-max-delay-passes 500 \
-   --enable-prefill-delayer
+   --dtype bfloat16
