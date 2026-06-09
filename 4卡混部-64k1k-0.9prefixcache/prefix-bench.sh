@@ -1,13 +1,28 @@
 #!/bin/bash
+set -e
 
-# 使用这个仓库的prefix cache测试工具https://gitcode.com/lauare/aisbench_auto_tools_prefix
-python3 aisbench_test.py \
-  --input_len 65536 \
-  --output_len 1024 \
-  --data_num 104 \
-  --concurrency 26 \
-  --request_rate 0 \
-  --dataset_type prefix_cache \
-  --repeat_rate 0.9 \
-  --prefix_test \
-  --dp 1
+
+export PYTHONPATH=/home/hzy/code/sglang/python:$PYTHONPATH
+
+# ===== Configuration =====
+HOST="127.0.0.1"
+PORT="6677"
+MODEL="/home/weights/MiniMax-M2.5-w8a8-QuaRot"
+DP=1
+
+# ===== Run benchmark =====
+python3 -m sglang.bench_serving \
+    --backend sglang \
+    --host "${HOST}" \
+    --port "${PORT}" \
+    --model "${MODEL}" \
+    --dataset-name generated-shared-prefix \
+    --gsp-num-groups 1 \
+    --gsp-prompts-per-group 104 \
+    --gsp-system-prompt-len 58982 \
+    --gsp-question-len 6552 \
+    --gsp-output-len 1024 \
+    --gsp-range-ratio 1.0 \
+    --request-rate inf \
+    --warmup-requests ${DP} \
+    --max-concurrency 26
