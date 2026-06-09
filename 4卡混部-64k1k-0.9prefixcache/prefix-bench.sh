@@ -2,7 +2,7 @@
 set -e
 
 
-export PYTHONPATH=/home/hzy/code/sglang/python:$PYTHONPATH
+export PYTHONPATH=/home/xxx/code/sglang/python:$PYTHONPATH
 
 # ===== Configuration =====
 HOST="127.0.0.1"
