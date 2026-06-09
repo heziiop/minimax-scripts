@@ -25,4 +25,4 @@ python3 -m sglang.bench_serving \
     --max-concurrency 112 \
     --num-prompts 448 \
     --random-range-ratio 1 \
-    --dataset-path /home/hzy/ShareGPT_V3_unfiltered_cleaned_split.json
+    --dataset-path /home/xxx/ShareGPT_V3_unfiltered_cleaned_split.json
