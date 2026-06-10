@@ -53,7 +53,7 @@ python -m sglang.launch_server \
    --prefill-max-requests 4 \
    --chunked-prefill-size 160000 \
    --max-prefill-token 80000 \
-   --cuda-graph-bs 2 4 6 8 10 \
+   --cuda-graph-bs 2 4 6 8 10 16 \
    --moe-a2a-backend ascend_fuseep --deepep-mode auto --quantization modelslim \
    --speculative-algorithm EAGLE3 \
    --speculative-draft-model-path $EAGLE_MODEL_PATH \
