@@ -9,6 +9,8 @@ unset HTTPS_PROXY
 unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
+export PYTHONPATH=/home/xxx/code/sglang/python:$PYTHONPATH
+
 source /usr/local/Ascend/ascend-toolkit/set_env.sh
 source /usr/local/Ascend/nnal/atb/set_env.sh
 # 内存碎片
@@ -26,8 +28,15 @@ export SGLANG_ENABLE_SPEC_V2=1
 export ASCEND_USE_FIA=1
 export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=640
+
+
+export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
+export DEEPEP_NORMAL_LONG_SEQ_ROUND=64
+export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=2048
+export DEEPEP_NORMAL_COMBINE_ENABLE_LONG_SEQ=1
+
+
 export HCCL_BUFFSIZE=128
-unset PYTORCH_NPU_ALLOC_CONF
 export SGLANG_ZBAL_LOCAL_MEM_SIZE=60184  # MB 占用的总MEM
 export SGLANG_ENABLE_TP_MEMORY_INBALANCE_CHECK=0
 #export SGLANG_ZBAL_BOOTSTRAP_URL="tcp://127.0.0.1:24669"  # 单机无需配置，多机配置为node0 ip
@@ -46,13 +55,13 @@ export SGLANG_EXTERNAL_MODEL_PACKAGE=custom_eagle3
 sglang serve \
    --model-path $MODEL_PATH \
    --host 127.0.0.1 \
-   --port 32001 \
+   --port 6677 \
    --tp-size 8 \
    --disable-radix-cache \
    --mem-fraction-static 0.74 \
-   --max-running-requests 24 \
+   --max-running-requests 18 \
    --chunked-prefill-size -1 --max-prefill-token 32768 \
-   --cuda-graph-bs 4 8 12 16 20 24 \
+   --cuda-graph-bs 2 4 6 8 10 12 14 16 18 24 \
    --moe-a2a-backend deepep --deepep-mode auto --quantization modelslim \
    --speculative-algorithm EAGLE3 \
    --speculative-draft-model-path $EAGLE_MODEL_PATH \
@@ -62,4 +71,4 @@ sglang serve \
    --speculative-draft-model-quantization unquant \
    --dtype bfloat16 \
    --trust-remote-code \
-   --tokenizer-worker-num 8
+   --tokenizer-worker-num 4
